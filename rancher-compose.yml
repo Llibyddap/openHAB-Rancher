@@ -1,0 +1,18 @@
+version: '2'
+services:
+  grafana:
+    scale: 1
+    start_on_create: true
+  nodered:
+    scale: 1
+    start_on_create: true
+  frontail:
+    scale: 1
+    start_on_create: true
+  openhab:
+    scale: 1
+    start_on_create: true
+  influxdb:
+    scale: 1
+    start_on_create: true
+
