@@ -80,7 +80,7 @@ services:
       - nodereddata:/data
 
   frontail:
-    build: https://github.com/Llibyddap/openHAB-Rancher.git#/
+    build: https://github.com/Llibyddap/openHAB-Rancher.git
     container_name: frontail
     restart: unless-stopped
     command: --disable-usage-stats --ui-highlight --ui-highlight-preset /frontail/preset/openhab.json -t openhab -l 2000 -n 200 /logs/openhab.log /logs/events.log
