@@ -80,7 +80,6 @@ services:
       - nodereddata:/data
 
   frontail:
-    image: 
     build: https://github.com/Llibyddap/openHAB-Rancher.git#/
     container_name: frontail
     restart: unless-stopped
