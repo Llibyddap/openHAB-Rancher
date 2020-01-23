@@ -25,14 +25,14 @@ services:
       - conf:/openhab/conf
       - userdata:/openhab/userdata
     environment:
-      OPENHAB_HTTP_PORT: '8081'
-      OPENHAB_HTTPS_PORT: '8444'
+      OPENHAB_HTTP_PORT: '8080'
+      OPENHAB_HTTPS_PORT: '8443'
       USER_ID: 1000
       GROUP_ID: 1000
       EXTRA_JAVA_OPTS: "-Duser.timezone=Europe/Berlin"
     ports:
-      - 8081:8081/tcp
-      - 8444:8444/tcp
+      - 8081:8080/tcp
+      - 8444:8443/tcp
 
   influxdb:
     image: influxdb:latest
@@ -80,15 +80,14 @@ services:
       - nodereddata:/data
 
   frontail:
-    image: mthenw/frontail:latest
+    image: 
+    build: https://github.com/Llibyddap/openHAB-Rancher.git#/
     container_name: frontail
     restart: unless-stopped
     command: --disable-usage-stats --ui-highlight --ui-highlight-preset /frontail/preset/openhab.json -t openhab -l 2000 -n 200 /logs/openhab.log /logs/events.log
     depends_on:
       - openhab
     volumes:
-      - "C:/Users/billr/Documents/GitHub/OpenHAB_Stack/frontail/preset.json:/frontail/preset/openhab.json:ro"
-      - "C:/Users/billr/Documents/GitHub/OpenHAB_Stack/frontail/openhab.css:/frontail/web/assets/styles/openhab.css:ro"
       -  userdata:/logs:ro
     ports:
       - 9002:9001
