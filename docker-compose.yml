@@ -1,0 +1,94 @@
+version: '2'
+
+volumes:
+  addons:
+    driver: rancher-nfs
+  conf:
+    driver: rancher-nfs
+  userdata:
+    driver: rancher-nfs
+  influxdata:
+    driver: rancher-nfs
+  grafanadata:
+    driver: rancher-nfs
+  nodereddata:
+    driver: rancher-nfs
+  
+
+services:
+  openhab:
+    image: openhab/openhab:latest
+    container_name: openhab
+    restart: always
+    volumes:
+      - addons:/openhab/addons
+      - conf:/openhab/conf
+      - userdata:/openhab/userdata
+    environment:
+      OPENHAB_HTTP_PORT: '8081'
+      OPENHAB_HTTPS_PORT: '8444'
+      USER_ID: 1000
+      GROUP_ID: 1000
+      EXTRA_JAVA_OPTS: "-Duser.timezone=Europe/Berlin"
+    ports:
+      - 8081:8081/tcp
+      - 8444:8444/tcp
+
+  influxdb:
+    image: influxdb:latest
+    container_name: influxdb
+    restart: always
+    ports:
+      - 8083:8083
+      - 8086:8086
+      - 8090:8090
+      - 25826:25826/udp
+      - 2003:2003
+    environment:
+      - INFLUXDB_DATA_ENGINE=tsm1
+      - INFLUXDB_REPORTING_DISABLED=false
+      - INFLUXDB_ADMIN_USER="admin"
+      - INFLUXDB_ADMIN_PASSWORD="123456789"
+      - INFLUXDB_USER="openhab"
+      - INFLUXDB_USER_PASSWORD="123456789"
+      - INFLUXDB_READ_USER="openhab_ro"
+      - INFLUXDB_READ_USER_PASSWORD="123456789"
+      - INFLUXDB_DB="openhab_db"
+    volumes:
+      - influxdata:/var/lib/influxdb/
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: always
+    user: "472:472"
+    ports:
+      - 3000:3000
+    environment: 
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,briangann-gauge-panel,natel-plotly-panel,grafana-simple-json-datasource
+    volumes:
+      - grafanadata:/var/lib/grafana/
+
+  nodered:
+    image: nodered/node-red-docker:latest
+    container_name: nodered
+    restart: always
+    user: root
+    ports:
+      - 1880:1880
+    volumes:
+      - nodereddata:/data
+
+  frontail:
+    image: mthenw/frontail:latest
+    container_name: frontail
+    restart: unless-stopped
+    command: --disable-usage-stats --ui-highlight --ui-highlight-preset /frontail/preset/openhab.json -t openhab -l 2000 -n 200 /logs/openhab.log /logs/events.log
+    depends_on:
+      - openhab
+    volumes:
+      - "C:/Users/billr/Documents/GitHub/OpenHAB_Stack/frontail/preset.json:/frontail/preset/openhab.json:ro"
+      - "C:/Users/billr/Documents/GitHub/OpenHAB_Stack/frontail/openhab.css:/frontail/web/assets/styles/openhab.css:ro"
+      -  userdata:/logs:ro
+    ports:
+      - 9002:9001
