@@ -15,7 +15,7 @@ volumes:
     driver: rancher-nfs
   frontailpresets:
     driver: rancher-nfs
-  fronttailweb:
+  frontailweb:
     driver: rancher-nfs  
 
 services:
@@ -64,7 +64,7 @@ services:
     image: grafana/grafana:latest
     container_name: grafana
     restart: always
-    user: "472:472"
+    user: "472"
     ports:
       - 3000:3000
     environment: 
@@ -86,12 +86,12 @@ services:
     image: mthenw/frontail:latest
     container_name: frontail
     restart: unless-stopped
-    command: --disable-usage-stats --ui-highlight --ui-highlight-preset /frontail/preset/openhab.json -t openhab -l 2000 -n 200 /logs/openhab.log /logs/events.log
+    command: --disable-usage-stats -l 2000 -n 200 /logs/openhab.log /logs/events.log
     depends_on:
       - openhab
     volumes:
-      -  frontaildata:/frontail/preset/
-      -  fronttailweb:/frontail/web/assets/styles/
+      -  frontailpresets:/frontail/preset/
+      -  frontailweb:/frontail/web/assets/styles/
       -  userdata:/logs:ro
     ports:
       - 9002:9001
