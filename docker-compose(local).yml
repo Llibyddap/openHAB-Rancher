@@ -56,7 +56,8 @@ services:
     image: mthenw/frontail
     container_name: frontail
     restart: unless-stopped
-    command: --disable-usage-stats --ui-highlight --ui-highlight-preset /frontail/preset/openhab.json -t openhab -l 2000 -n 200 /logs/logs/openhab.log /logs/logs/events.log
+    command: --disable-usage-stats -l 2000 -n 200 /logs/logs/openhab.log /logs/logs/events.log
+    # after start and migratin of files:  command: --disable-usage-stats --ui-highlight --ui-highlight-preset /frontail/preset/openhab.json -t openhab -l 2000 -n 200 /logs/logs/openhab.log /logs/logs/events.log
     depends_on:
       - openhab
     volumes:
