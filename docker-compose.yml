@@ -20,8 +20,8 @@ volumes:
 
 services:
   openhab:
-    image: openhab/openhab:latest
-    container_name: openhab
+    image: openhab/openhab:2.5.1
+    container_name: OpenHAB
     restart: always
     volumes:
       - addons:/openhab/addons
@@ -30,9 +30,9 @@ services:
     environment:
       OPENHAB_HTTP_PORT: '8080'
       OPENHAB_HTTPS_PORT: '8443'
-      USER_ID: 1000
-      GROUP_ID: 1000
-      EXTRA_JAVA_OPTS: "-Duser.timezone=Europe/Berlin"
+      USER_ID: 2000
+      GROUP_ID: 2000
+      EXTRA_JAVA_OPTS: "-Duser.timezone=America/Los_Angeles"
     ports:
       - 8081:8080/tcp
       - 8444:8443/tcp
