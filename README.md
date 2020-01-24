@@ -35,8 +35,9 @@ Next you'll have to install the presets json and css files for frontail.
 navigate to the StackName_frontailweb_xxxxx and 
 
 wget https://raw.githubusercontent.com/Llibyddap/openHAB-Rancher/master/openhab.css
+wget https://raw.githubusercontent.com/Llibyddap/openHAB-Rancher/master/bootstrap.min.css
 
-then navigate to teh StackName_frontailpresets_xxxxx and
+then navigate to the StackName_frontailpresets_xxxxx and
 
 wget https://raw.githubusercontent.com/Llibyddap/openHAB-Rancher/master/openhab.json
 
