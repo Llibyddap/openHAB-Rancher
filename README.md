@@ -28,6 +28,8 @@ nodered:latest
 
 influxdb:latest
 
+(influx environment variables are not passed by the docker-compose file - still have to manual input from cli.  To be fixed.)
+
 grafana:latest
 
 frontail:4.8
