@@ -1,98 +1,107 @@
 version: '2'
-
 volumes:
-  addons:
-    driver: rancher-nfs
-  conf:
-    driver: rancher-nfs
   userdata:
     driver: rancher-nfs
-  influxdata:
-    driver: rancher-nfs
-  grafanadata:
+  addons:
     driver: rancher-nfs
   nodereddata:
     driver: rancher-nfs
   frontailpresets:
     driver: rancher-nfs
+  influxdata:
+    driver: rancher-nfs
+  conf:
+    driver: rancher-nfs
+  grafanadata:
+    driver: rancher-nfs
+  chronograf:
+    external: true
+    driver: rancher-nfs
   frontailweb:
-    driver: rancher-nfs  
-
+    driver: rancher-nfs
 services:
-  openhab:
-    image: openhab/openhab:2.5.1
-    container_name: OpenHAB
-    restart: always
+  Chronograf:
+    image: chronograf:1.5
+    stdin_open: true
     volumes:
-      - addons:/openhab/addons
-      - conf:/openhab/conf
-      - userdata:/openhab/userdata
-    environment:
-      OPENHAB_HTTP_PORT: '8080'
-      OPENHAB_HTTPS_PORT: '8443'
-      USER_ID: 2000
-      GROUP_ID: 2000
-      EXTRA_JAVA_OPTS: '-Duser.timezone=America/Los_Angeles'
+    - chronograf:/var/lib/chronograf
+    tty: true
     ports:
-      - 8081:8080/tcp
-      - 8444:8443/tcp
-
-  influxdb:
-    image: influxdb:latest
-    container_name: influxdb
-    restart: always
-    ports:
-      - 8083:8083
-      - 8086:8086
-      - 8090:8090
-      - 25826:25826/udp
-      - 2003:2003
-    environment:
-      - INFLUXDB_DATA_ENGINE=tsm1
-      - INFLUXDB_REPORTING_DISABLED=false
-      - INFLUXDB_ADMIN_USER='admin'
-      - INFLUXDB_ADMIN_PASSWORD='123456789'
-      - INFLUXDB_USER='openhab'
-      - INFLUXDB_USER_PASSWORD='123456789'
-      - INFLUXDB_READ_USER='openhab_ro'
-      - INFLUXDB_READ_USER_PASSWORD='123456789'
-      - INFLUXDB_DB='openhab_db'
-    volumes:
-      - influxdata:/var/lib/influxdb/
-
+    - 8888:8888/tcp
+    command:
+    - --influxdb-url=http:/192.168.2.81:8086
+    labels:
+      io.rancher.container.pull_image: always
   grafana:
     image: grafana/grafana:latest
-    container_name: grafana
-    restart: always
-    user: "472"
-    ports:
-      - 3000:3000
-    environment: 
-      - GF_INSTALL_PLUGINS=grafana-clock-panel,briangann-gauge-panel,natel-plotly-panel,grafana-simple-json-datasource
+    environment:
+      GF_INSTALL_PLUGINS: grafana-clock-panel,briangann-gauge-panel,natel-plotly-panel,grafana-simple-json-datasource
     volumes:
-      - grafanadata:/var/lib/grafana/
-
+    - grafanadata:/var/lib/grafana/
+    ports:
+    - 3000:3000/tcp
+    user: '472'
   nodered:
     image: nodered/node-red-docker:latest
-    container_name: nodered
-    restart: always
-    user: root
-    ports:
-      - 1880:1880
     volumes:
-      - nodereddata:/data
-
+    - nodereddata:/data
+    ports:
+    - 1880:1880/tcp
+    user: root
   frontail:
     image: mthenw/frontail:latest
-    container_name: frontail
-    restart: unless-stopped
-    command: --disable-usage-stats -l 2000 -n 200 /logs/logs/openhab.log /logs/logs/events.log
-    # after start and migratin of files:  command: --disable-usage-stats --ui-highlight --ui-highlight-preset /frontail/preset/openhab.json -t openhab -l 2000 -n 200 /logs/logs/openhab.log /logs/logs/events.log
-    depends_on:
-      - openhab
     volumes:
-      -  frontailpresets:/frontail/preset/
-      -  frontailweb:/frontail/web/assets/styles/
-      -  userdata:/logs:ro
+    - frontailpresets:/frontail/preset/
+    - frontailweb:/frontail/web/assets/styles/
+    - userdata:/logs:ro
     ports:
-      - 9002:9001
+    - 9002:9001/tcp
+    command:
+    - --disable-usage-stats
+    - --ui-highlight
+    - --ui-highlight-preset
+    - /frontail/preset/openhab.json
+    - -t
+    - openhab
+    - -l
+    - '2000'
+    - -n
+    - '200'
+    - /logs/logs/openhab.log
+    - /logs/logs/events.log
+  openhab:
+    image: openhab/openhab:2.5.1
+    environment:
+      EXTRA_JAVA_OPTS: -Duser.timezone=America/Los_Angeles
+      GROUP_ID: '2000'
+      OPENHAB_HTTPS_PORT: '8443'
+      OPENHAB_HTTP_PORT: '8080'
+      USER_ID: '2000'
+    volumes:
+    - addons:/openhab/addons
+    - conf:/openhab/conf
+    - userdata:/openhab/userdata
+    ports:
+    - 8081:8080/tcp
+    - 8444:8443/tcp
+    - 9110:9110/tcp
+  influxdb:
+    image: influxdb:latest
+    environment:
+      INFLUXDB_ADMIN_PASSWORD: '"123456789"'
+      INFLUXDB_ADMIN_USER: '"admin"'
+      INFLUXDB_DATA_ENGINE: tsm1
+      INFLUXDB_DB: '"openhab_db"'
+      INFLUXDB_READ_USER: '"openhab_ro"'
+      INFLUXDB_READ_USER_PASSWORD: '"123456789"'
+      INFLUXDB_REPORTING_DISABLED: 'false'
+      INFLUXDB_USER: '"openhab"'
+      INFLUXDB_USER_PASSWORD: '"123456789"'
+    volumes:
+    - influxdata:/var/lib/influxdb/
+    ports:
+    - 8083:8083/tcp
+    - 8086:8086/tcp
+    - 8090:8090/tcp
+    - 25826:25826/udp
+    - 2003:2003/tcp
